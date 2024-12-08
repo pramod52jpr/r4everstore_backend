@@ -1,5 +1,5 @@
 const dotenv = require("dotenv");
-dotenv.config({path : "config/config.env"})
+dotenv.config({ path: "./.env" })
 const express = require("express");
 const mongoose = require("mongoose");
 const PORT = process.env.PORT || 8080;
@@ -24,6 +24,9 @@ app.use('/api/task', taskRouter);
 app.use('/api/holiday', holidayRouter);
 app.use('/api/plan', planRouter);
 
+app.use('/', (req, res) => {
+    res.send(`Backend Running Successfully !`)
+})
 
 app.listen(PORT, () => {
     console.log(`listening at ${PORT}`);
