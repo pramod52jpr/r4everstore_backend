@@ -13,7 +13,7 @@ const authVerify = async (req, res, next) => {
             }
             const userData = await User.findById(user.id);
             if(!userData) return res.send({status: false, message: "Invaid User"});
-            const myPlans = await PurchasePlan.find({userId: user.id});
+            const myPlans = await PurchasePlan.find({userId: user.id, status: true});
             const plan = myPlans.filter(e => e.expiry > Date.now()).pop()?.planName;
 
             req.user = user;
