@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  node-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT}:${PORT}" # Dynamically map the PORT from .env
+    volumes:
+      - .:/r4everstore_backend
+      - /r4everstore_backend/node_modules
+    env_file:
+      - .env # Load environment variables from the .env file
