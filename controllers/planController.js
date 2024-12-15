@@ -141,8 +141,8 @@ exports.uploadQrCode = async (req, res) => {
 
 exports.purchasePlanRequest = async (req, res) => {
     try{
-        let data = await PurchasePlan.find();
-        data = data.filter(e => e.status == false);
+        let data = await PurchasePlan.find().populate('userId');
+        data = data.filter(e => e.status == false && e.userId!=null);
         const baseUrl = `${req.protocol}://${req.get('host')}/`;
         data = data.map(e => {
             return {...e._doc, image: baseUrl+e.image};
