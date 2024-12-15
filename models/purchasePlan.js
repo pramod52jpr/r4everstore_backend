@@ -28,6 +28,10 @@ const purchasePlanSchema = mongoose.Schema(
         status: {
             type: Boolean,
             default: false,
+        },
+        declined: {
+            type: Boolean,
+            default: false,
         }
     },
     {timestamps: {}}

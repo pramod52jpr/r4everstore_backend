@@ -4,7 +4,7 @@ const Global = require("../models/global_model");
 
 exports.addPurchasePlan = async (req, res) => {
     try{
-        const {planName, amount, purchaseDate, expiry, status, planId} = req.body;
+        const {planName, amount, purchaseDate, expiry, status, declined, planId} = req.body;
         const userId = req.user.id;
         const userData = await User.findById(userId);
         if(status == true){
@@ -116,6 +116,11 @@ exports.addPurchasePlan = async (req, res) => {
             purchPlan.status = true;
             await purchPlan.save();
             res.send({status: true, message: "Plan Approved successfully"});
+        }else if(declined == true){
+            const purchPlan = await PurchasePlan.findById(planId);
+            purchPlan.declined = true;
+            await purchPlan.save();
+            res.send({status: true, message: "Plan declined successfully"});
         }else{
             const image = req.file;
             const uploadImage = image.destination + image.filename;
@@ -165,7 +170,7 @@ exports.deleteQrCode = async (req, res) => {
 exports.purchasePlanRequest = async (req, res) => {
     try{
         let data = await PurchasePlan.find().populate('userId');
-        data = data.filter(e => e.status == false && e.userId!=null);
+        data = data.filter(e => e.status == false && e.declined == false && e.userId!=null);
         const baseUrl = `${req.protocol}://${req.get('host')}/`;
         data = data.map(e => {
             return {...e._doc, image: baseUrl+e.image};
