@@ -1,6 +1,7 @@
 const PurchasePlan = require("../models/purchasePlan");
 const User = require("../models/user");
 const Global = require("../models/global_model");
+const protocol = require("../protocol");
 
 exports.addPurchasePlan = async (req, res) => {
     try{
@@ -147,7 +148,7 @@ exports.uploadQrCode = async (req, res) => {
 exports.getPaymentQr = async (req, res) => {
     try{
         let data = await Global.findOne();
-        const baseUrl = `${req.protocol}://${req.get('host')}/`;
+        const baseUrl = `${protocol}://${req.get('host')}/`;
         if(data != null){
             data = {...data._doc, qrCode: baseUrl+data.qrCode};
         }
@@ -171,7 +172,7 @@ exports.purchasePlanRequest = async (req, res) => {
     try{
         let data = await PurchasePlan.find().populate('userId');
         data = data.filter(e => e.status == false && e.declined == false && e.userId!=null);
-        const baseUrl = `${req.protocol}://${req.get('host')}/`;
+        const baseUrl = `${protocol}://${req.get('host')}/`;
         data = data.map(e => {
             return {...e._doc, image: baseUrl+e.image};
         });
