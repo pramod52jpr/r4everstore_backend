@@ -139,6 +139,29 @@ exports.uploadQrCode = async (req, res) => {
     }
 }
 
+exports.getPaymentQr = async (req, res) => {
+    try{
+        let data = await Global.findOne();
+        const baseUrl = `${req.protocol}://${req.get('host')}/`;
+        if(data != null){
+            data = {...data._doc, qrCode: baseUrl+data.qrCode};
+        }
+        res.send({status: true, message: "Data fetched successfully", data: data});
+    }catch(e){
+        res.send({status: false, message: e.message});
+    }
+}
+
+
+exports.deleteQrCode = async (req, res) => {
+    try{
+        await Global.deleteOne();
+        res.send({status: true, message: "Qr Code deleted successfully"});
+    }catch(e){
+        res.send({status: false, message: e.message});
+    }
+}
+
 exports.purchasePlanRequest = async (req, res) => {
     try{
         let data = await PurchasePlan.find().populate('userId');
