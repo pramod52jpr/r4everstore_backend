@@ -2,6 +2,7 @@ const Holiday = require("../models/holiday");
 const Task = require("../models/task");
 const TaskWork = require("../models/taskWork");
 const User = require("../models/user");
+const protocol = require("../protocol");
 
 
 exports.uploadTask = async (req, res) => {
@@ -37,7 +38,7 @@ exports.getAllTasks = async (req, res) => {
             tasks = await Task.find().select('-__v');
         }
         if(tasks.length == 0) return res.send({status : false, message : "No Task Available"});
-        const baseUrl = `${req.protocol}://${req.get('host')}/`;
+        const baseUrl = `${protocol}://${req.get('host')}/`;
         tasks = tasks.map(e => e.category != 'youtube' ? {...e._doc, link: baseUrl+e.link}: e._doc);
 
         const today = new Date();
@@ -151,7 +152,7 @@ exports.getMyTaskWork = async (req, res) => {
 
         taskWorkData = taskWorkData.filter((e) => e.taskId != null);
         if(taskWorkData.length == 0) return res.send({status : false, message : "No Task Available"});
-        const baseUrl = `${req.protocol}://${req.get('host')}/`;
+        const baseUrl = `${protocol}://${req.get('host')}/`;
         taskWorkData = taskWorkData.map(e => e.taskId.category != 'youtube' ? {...e._doc, taskId: {...e.taskId._doc, link: baseUrl+e.taskId.link}}: e);
         res.send({status: true, message: "Task fetched successfully", data: taskWorkData});
     }catch(e){
