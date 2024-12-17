@@ -6,9 +6,9 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "${PORT}:${PORT}" # Dynamically map the PORT from .env
+      - "${PORT}:${PORT}"
     volumes:
       - .:/r4everstore_backend
       - /r4everstore_backend/node_modules
     env_file:
-      - .env # Load environment variables from the .env file
+      - .env
