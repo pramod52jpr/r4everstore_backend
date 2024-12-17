@@ -6,6 +6,22 @@ const globalSchema = mongoose.Schema(
             type: String,
             default: null,
         },
+        silverLock: {
+            type: Boolean,
+            default: false,
+        },
+        goldLock: {
+            type: Boolean,
+            default: false,
+        },
+        platinumLock: {
+            type: Boolean,
+            default: false,
+        },
+        diamondLock: {
+            type: Boolean,
+            default: false,
+        },
     },
     {timestamps: {}}
 )
