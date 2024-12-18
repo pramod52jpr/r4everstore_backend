@@ -1,6 +1,6 @@
 let protocol="http"
 if (process.env.NODE_ENV === "PRODUCTION") {
-  protocol = "https";
+  protocol = "http";
 }
 
 module.exports = protocol;

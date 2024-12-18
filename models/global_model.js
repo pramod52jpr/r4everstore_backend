@@ -20,7 +20,7 @@ const globalSchema = mongoose.Schema(
         },
         diamondLock: {
             type: Boolean,
-            default: false,
+            default: true,
         },
     },
     {timestamps: {}}
