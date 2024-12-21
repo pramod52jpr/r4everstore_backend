@@ -235,6 +235,38 @@ exports.changePlanSetting = async (req, res) => {
     }
 }
 
+exports.updateTermsConditions = async (req, res) => {
+    try{
+        const {termsConditions} = req.body;
+        let data = await Global.findOne();
+        if(data){
+            data.termsConditions = termsConditions;
+            await data.save();
+            return res.send({status: true, message: "Terms & conditions updated successfully"});;
+        }
+        await Global.create({termsConditions: termsConditions});
+        res.send({status: true, message: "Terms & conditions updated successfully"});
+    }catch(e){
+        res.send({status: false, message: e.message});
+    }
+}
+
+exports.updateImpMsg = async (req, res) => {
+    try{
+        const {impMsg} = req.body;
+        let data = await Global.findOne();
+        if(data){
+            data.impMsg = impMsg;
+            await data.save();
+            return res.send({status: true, message: "Notification updated successfully"});;
+        }
+        await Global.create({impMsg: impMsg});
+        res.send({status: true, message: "Notification updated successfully"});
+    }catch(e){
+        res.send({status: false, message: e.message});
+    }
+}
+
 // exports.addPurchasePlan = async (req, res) => {
 //     try{
 //         const {planName, amount, purchaseDate, expiry} = req.body;

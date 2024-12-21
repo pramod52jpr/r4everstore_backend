@@ -23,6 +23,9 @@ exports.updateBankDetail = async (req, res) => {
         bank.bankName = bankName;
         bank.ifscCode = ifscCode;
         await bank.save();
+        const user = await User.findById(id);
+        user.wallet-=500;
+        await user.save();
         res.send({status: true, message: "Bank details updated successfully"});
     }catch(e){
         res.send({status: false, message: e.message});

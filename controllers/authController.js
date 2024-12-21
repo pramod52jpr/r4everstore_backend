@@ -184,8 +184,39 @@ exports.blockUnblockUser = async (req, res) => {
 
 exports.getAllUsersList = async (req, res) => {
     try{
-        const users = await User.find().select('-password');
-        res.send({status: true, message: "Users fetched successfully", data: users});
+        let users = await User.find().select('-password');
+        let userWithPlans = [];
+        for(var index in users){
+            let myPlans = await PurchasePlan.find({userId: users[index]._id});
+            myPlans = myPlans.filter(e => e.status == true && e.declined == false);
+            const plan = myPlans.filter(e => e.expiry > Date.now()).pop();
+            userWithPlans.push({...users[index]._doc, plan: plan});
+        }
+        // users = users.map(async e => {
+            // let myPlans = await PurchasePlan.find({userId: e.userId});
+            // myPlans = myPlans.filter(e => e.status == true && e.declined == false)
+            // const plan = myPlans.filter(e => e.expiry > Date.now()).pop();
+            // return {...e, plan: 'plan'};
+        // });
+        res.send({status: true, message: "Users fetched successfully", data: userWithPlans});
+    }catch(e){
+        res.send({status: false, message: e.message});
+    }
+}
+
+exports.changePassword = async (req, res) => {
+    try{
+        const {password, confirmPassword} = req.body;
+        const userId = req.user.id;
+        if(password != confirmPassword) return res.send({status: false, message: "Confirm password is not same as password"});
+        if(password.length < 8) return res.send({status: false, message: "Password must be at least 8 characters"});
+        const hashedPassword = await bcryptjs.hash(password, 8);
+        const user = await User.findById(userId);
+        if(!user) return res.send({status: false, message: "User doesn't exist"});
+        user.password = hashedPassword;
+        user.wallet-=100;
+        await user.save();
+        res.send({status: true, message: 'Password chnages successfully'});
     }catch(e){
         res.send({status: false, message: e.message});
     }

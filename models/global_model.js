@@ -22,6 +22,14 @@ const globalSchema = mongoose.Schema(
             type: Boolean,
             default: true,
         },
+        termsConditions: {
+            type: String,
+            default: '',
+        },
+        impMsg: {
+            type: String,
+            default: '',
+        }
     },
     {timestamps: {}}
 )
