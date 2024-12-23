@@ -17,14 +17,21 @@ exports.updateBankDetail = async (req, res) => {
     try{
         const {accountNo, bankName, ifscCode} = req.body;
         const id = req.user.id;
+        if(accountNo.legth == 0 || bankName.length == 0 || ifscCode.length == 0) return res.send({status: false, message: "Fill all bank details correct"});
         const bank = await BankDetail.findOne({userId: id});
         if(!bank) return res.send({status: false, message: "Details doesn't exist"});
+        var first = false;
+        if(bank.accountNo.length == 0){
+            first = true;
+        }
         bank.accountNo = accountNo;
         bank.bankName = bankName;
         bank.ifscCode = ifscCode;
         await bank.save();
         const user = await User.findById(id);
-        user.wallet-=500;
+        if(first == false){
+            user.wallet-=500;
+        }
         await user.save();
         res.send({status: true, message: "Bank details updated successfully"});
     }catch(e){
