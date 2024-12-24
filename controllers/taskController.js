@@ -136,7 +136,7 @@ exports.addTaskWork = async (req, res) => {
         await TaskWork.create({userId, taskId});
         res.send({status: true, message: "Task added successfully", taskWork});
     }catch(e){
-        res.send({status : false, message : e});
+        res.send({status : false, message : typeof(e) == "object" ? e.message : e});
     }
 }
 
