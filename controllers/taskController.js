@@ -119,16 +119,16 @@ exports.addTaskWork = async (req, res) => {
         if(plan == 'platinum' && taskWork.length >= 40) return res.send({status : false, message : "Your task quota has ended for today"});
         
         if(taskData.category == 'youtube'){
-            if((plan == 'silver' && taskWork.filter(e => e.taskId.category == 'youtube').length >= 6)
-                || (plan == 'gold' && taskWork.filter(e => e.taskId.category == 'youtube').length >= 12)
-                || (plan == 'platinum' && taskWork.filter(e => e.taskId.category == 'youtube').length >= 35)){
+            if((plan == 'silver' && taskWork.filter(e => e.taskId?.category == 'youtube').length >= 6)
+                || (plan == 'gold' && taskWork.filter(e => e.taskId?.category == 'youtube').length >= 12)
+                || (plan == 'platinum' && taskWork.filter(e => e.taskId?.category == 'youtube').length >= 35)){
                 return res.send({status : false, message : "Your maximum quota of youtube task has ended for today"});
             }
         }
         if(taskData.category != 'youtube'){
-            if((plan == 'silver' && taskWork.filter(e => e.taskId.category != 'youtube').length >= 4)
-                || (plan == 'gold' && taskWork.filter(e => e.taskId.category != 'youtube').length >= 3)
-                || (plan == 'platinum' && taskWork.filter(e => e.taskId.category != 'youtube').length >= 5)){
+            if((plan == 'silver' && taskWork.filter(e => e.taskId?.category != 'youtube').length >= 4)
+                || (plan == 'gold' && taskWork.filter(e => e.taskId?.category != 'youtube').length >= 3)
+                || (plan == 'platinum' && taskWork.filter(e => e.taskId?.category != 'youtube').length >= 5)){
                 return res.send({status : false, message : "Your maximum quota of business and local business task has ended for today"});
             }
         }
