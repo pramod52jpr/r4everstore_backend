@@ -70,7 +70,7 @@ exports.addWithdrawRequest = async (req, res) => {
 
 exports.getAllWithdrawRequest = async (req, res) => {
     try{
-        let requests = await Withdraw.find().populate('userId');
+        let requests = await Withdraw.find({success: false}).populate('userId');
         const bank = await BankDetail.find();
         requests = requests.map(e => {
             return {...e._doc, bankDetails: bank.filter(ele => ele.userId.toString() == e.userId._id.toString())[0]};
