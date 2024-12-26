@@ -96,7 +96,7 @@ exports.signin = async (req, res) => {
         if(!isMatch){
             return res.send({status: false, message: "Incorrect Password"});
         }
-        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn : "7d"});
+        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET);
         const userData = await User.findOne({phone}).select('-password -createdAt -updatedAt -__v');
         const myPlans = await PurchasePlan.find({userId: userData._id, status: true});
         const plan = myPlans.filter(e => e.expiry > Date.now()).pop()?.planName;
