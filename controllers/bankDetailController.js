@@ -75,6 +75,7 @@ exports.getAllWithdrawRequest = async (req, res) => {
         requests = requests.map(e => {
             return {...e._doc, bankDetails: bank.filter(ele => ele.userId.toString() == e.userId._id.toString())[0]};
         })
+        if(requests.length == 0) return res.send({status: false, message: 'No data found'});
         res.send({status: true, message: "Data fetched successfully", data: requests});
     }catch(e){
         res.send({status: false, message: e.message});
@@ -88,6 +89,21 @@ exports.sendMoneySuccess = async (req, res) => {
         withdrawData.success = true;
         await withdrawData.save();
         res.send({status: true, message: "Withdraw Status Updated"});
+    }catch(e){
+        res.send({status: false, message: e.message});
+    }
+}
+
+exports.getMyWithdrawals = async (req, res) => {
+    try{
+        const userId = req.user.id;
+        let requests = await Withdraw.find({userId}).populate('userId');
+        const bank = await BankDetail.find();
+        requests = requests.map(e => {
+            return {...e._doc, bankDetails: bank.filter(ele => ele.userId.toString() == e.userId._id.toString())[0]};
+        })
+        if(requests.length == 0) return res.send({status: false, message: 'No data found'});
+        res.send({status: true, message: "Data fetched successfully", data: requests});
     }catch(e){
         res.send({status: false, message: e.message});
     }
