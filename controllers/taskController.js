@@ -122,19 +122,19 @@ exports.addTaskWork = async (req, res) => {
             if(plan == null) return res.send({status : false, message : "Please purchase any plan first"});
         }
 
-        if(plan == 'silver' && taskWork.length >= 10) return res.send({status : false, message : "Your task quota has ended for today"});
+        if((plan == null || plan == 'silver') && taskWork.length >= 10) return res.send({status : false, message : "Your task quota has ended for today"});
         if(plan == 'gold' && taskWork.length >= 15) return res.send({status : false, message : "Your task quota has ended for today"});
         if(plan == 'platinum' && taskWork.length >= 40) return res.send({status : false, message : "Your task quota has ended for today"});
         
         if(taskData.category == 'youtube'){
-            if((plan == 'silver' && taskWork.filter(e => e.taskId?.category == 'youtube').length >= 6)
+            if(((plan == null || plan == 'silver') && taskWork.filter(e => e.taskId?.category == 'youtube').length >= 6)
                 || (plan == 'gold' && taskWork.filter(e => e.taskId?.category == 'youtube').length >= 12)
                 || (plan == 'platinum' && taskWork.filter(e => e.taskId?.category == 'youtube').length >= 35)){
                 return res.send({status : false, message : "Your maximum quota of youtube task has ended for today"});
             }
         }
         if(taskData.category != 'youtube'){
-            if((plan == 'silver' && taskWork.filter(e => e.taskId?.category != 'youtube').length >= 4)
+            if(((plan == null || plan == 'silver') && taskWork.filter(e => e.taskId?.category != 'youtube').length >= 4)
                 || (plan == 'gold' && taskWork.filter(e => e.taskId?.category != 'youtube').length >= 3)
                 || (plan == 'platinum' && taskWork.filter(e => e.taskId?.category != 'youtube').length >= 5)){
                 return res.send({status : false, message : "Your maximum quota of business and local business task has ended for today"});
@@ -184,7 +184,7 @@ exports.updateTaskWork = async (req, res) => {
             taskWorkData.image = image.destination + image.filename;
         }
         await taskWorkData.save();
-        if(plan == 'silver'){
+        if(plan == null || plan == 'silver'){
             user.wallet+=5;
         }else if(plan == 'gold'){
             user.wallet+=10;
