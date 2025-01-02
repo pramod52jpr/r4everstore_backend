@@ -126,6 +126,12 @@ exports.addPurchasePlan = async (req, res) => {
         }else{
             const userId = req.user.id;
             const image = req.file;
+            
+            let myPlans = await PurchasePlan.find({userId: userId});
+            myPlans = myPlans.filter(e => e.status == false && e.declined == false)
+            const plan = myPlans.filter(e => e.expiry > Date.now()).pop()?.planName;
+            if(plan) return res.send({status: false, message: "Wait for last uploaded plan response"});
+            
             const uploadImage = image.destination + image.filename;
             await PurchasePlan.create({planName, amount, userId, purchaseDate, expiry, image: uploadImage});
             res.send({status: true, message: "Plan purchase requested successfully"});

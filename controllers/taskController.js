@@ -113,7 +113,15 @@ exports.addTaskWork = async (req, res) => {
 
         const holiday = await Holiday.findOne({month: today.getMonth()+1, day: today.getDate()});
         if(holiday || todayDayName == 'Sunday') return res.send({status : false, message : "Today is holiday. No task added"});
-        if(plan == null) return res.send({status : false, message : "Please purchase any plan first"});
+
+        const user = await User.findById(userId);
+        const createdAt = new Date(user.createdAt);
+        const twoDaysLater = new Date(createdAt.getTime() + (2*24*60*60*1000));
+        const currentDate = new Date();
+        if(twoDaysLater < currentDate){
+            if(plan == null) return res.send({status : false, message : "Please purchase any plan first"});
+        }
+
         if(plan == 'silver' && taskWork.length >= 10) return res.send({status : false, message : "Your task quota has ended for today"});
         if(plan == 'gold' && taskWork.length >= 15) return res.send({status : false, message : "Your task quota has ended for today"});
         if(plan == 'platinum' && taskWork.length >= 40) return res.send({status : false, message : "Your task quota has ended for today"});
