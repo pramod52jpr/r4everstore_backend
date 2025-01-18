@@ -13,6 +13,7 @@ const authVerify = async (req, res, next) => {
             }
             const userData = await User.findById(user.id);
             if(!userData) return res.send({status: false, message: "Invaid User"});
+            if(userData.blocked == true) return res.send({status: false, message: "You are blocked by admin"});
             let myPlans = await PurchasePlan.find({userId: user.id});
             myPlans = myPlans.filter(e => e.status == true && e.declined == false)
             const plan = myPlans.filter(e => e.expiry > Date.now()).pop()?.planName;
