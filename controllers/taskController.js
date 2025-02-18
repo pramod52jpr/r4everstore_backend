@@ -1,8 +1,10 @@
+const { putObjectUrl, getObjectUrl } = require("../middlewares/s3_object_url");
 const Holiday = require("../models/holiday");
 const Task = require("../models/task");
 const TaskWork = require("../models/taskWork");
 const User = require("../models/user");
 const protocol = require("../protocol");
+const uuid = require("uuid");
 
 
 exports.uploadTask = async (req, res) => {
@@ -15,15 +17,26 @@ exports.uploadTask = async (req, res) => {
     }
 }
 
+
+exports.generateUploadUrl = async (req, res) => {
+    try{
+        const { key } = req.body;
+        const url = await putObjectUrl(key);
+        res.send({status: true, url: url});
+    }catch(e){
+        res.send({status : false, message : e});
+    }
+}
+
 exports.uploadNonYoutubeTask = async (req, res) => {
     try{
-        const {category} = req.body;
-        const video = req.file;
-        const link = video.destination + video.filename;
+        const {category, link} = req.body;
+        // const video = req.file;
+        // const link = video.destination + video.filename;
         await Task.create({link, category});
         res.send({status: true, message: "Task uploaded successfully"});
     }catch(e){
-        res.send({status : false, message : e});
+        res.send({status : false, message : typeof(e) == "string" ? e : e.message});
     }
 }
 
@@ -39,16 +52,24 @@ exports.getAllTasks = async (req, res) => {
         }
         if(tasks.length == 0) return res.send({status : false, message : "No Task Available"});
         const baseUrl = `${protocol}://${req.get('host')}/`;
-        tasks = tasks.map(e => e.category != 'youtube' ? {...e._doc, link: baseUrl+e.link}: e._doc);
+        // tasks = tasks.map( async e => {
+        //     return e.category != 'youtube' ? !e.link.includes("uploads/") ? await getObjectUrl(e.link) : {...e._doc, link: baseUrl+e.link}: e._doc;
+        // });
+
+        let allTasks = [];
+        for (let index = 0; index < tasks.length; index++) {
+            const e = tasks[index];
+            allTasks.push(e.category != 'youtube' ? !e.link.includes("uploads/") ? {...e._doc, link: await getObjectUrl(e.link)} : {...e._doc, link: baseUrl+e.link}: e._doc);
+        }
 
         const today = new Date();
         const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
         const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 24, 0, 0);
         const taskWork = await TaskWork.find({userId: userId, createdAt: {$gte: startOfDay, $lt: endOfDay}});
-        tasks = tasks.map(e => {            
+        allTasks = allTasks.map(e => {            
             return {...e, assigned : taskWork.filter(ele => ele.taskId.toString() == e._id.toString()).length != 0};
         });
-        res.send({status: true, message: "Data fetched successfully", data: tasks});
+        res.send({status: true, message: "Data fetched successfully", data: allTasks});
     }catch(e){
         res.send({status : false, message : e});
     }
@@ -69,13 +90,14 @@ exports.updateTask = async (req, res) => {
 
 exports.updateNonYoutubeTask = async (req, res) => {
     try{
-        const {taskId, category} = req.body;
+        const {taskId, category, link} = req.body;
         const taskData = await Task.findById(taskId);
-        const file = req.file;
-        if(file){
-            const link = file.destination + file.filename;
-            taskData.link = link;
-        }
+        // const file = req.file;
+        // if(file){
+        //     const link = file.destination + file.filename;
+        //     taskData.link = link;
+        // }
+        taskData.link = link;
         taskData.category = category;
         await taskData.save();
         res.send({status: true, message: "Task updated successfully"});
@@ -171,18 +193,19 @@ exports.getMyTaskWork = async (req, res) => {
 
 exports.updateTaskWork = async (req, res) => {
     try{
-        const {taskId} = req.body;
+        const {taskId, image} = req.body;
         const userId = req.user.id;
         const plan = req.plan;
         const user = await User.findById(userId);
         if(!user) return res.send({status: false, message: "User doesn't exist"});
-        const image = req.file;
+        // const image = req.file;
         const taskWorkData = await TaskWork.findById(taskId);
         if(!taskWorkData) return res.send({status: false, message: "Task not found"});
         taskWorkData.completed = true;
-        if(image){
-            taskWorkData.image = image.destination + image.filename;
-        }
+        // if(image){
+        //     taskWorkData.image = image.destination + image.filename;
+        // }
+        taskWorkData.image = image;
         await taskWorkData.save();
         if(plan == null || plan == 'silver'){
             user.wallet+=5;

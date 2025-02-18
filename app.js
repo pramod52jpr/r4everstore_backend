@@ -25,7 +25,7 @@ app.use('/api/holiday', holidayRouter);
 app.use('/api/plan', planRouter);
 
 app.use('/', (req, res) => {
-    res.send(`Backend Running Successfully !`)
+    res.send(`Backend Running Successfully !`);
 })
 
 app.listen(PORT, () => {

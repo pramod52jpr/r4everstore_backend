@@ -2,10 +2,11 @@ const PurchasePlan = require("../models/purchasePlan");
 const User = require("../models/user");
 const Global = require("../models/global_model");
 const protocol = require("../protocol");
+const { getObjectUrl } = require("../middlewares/s3_object_url");
 
 exports.addPurchasePlan = async (req, res) => {
     try{
-        const {planName, amount, purchaseDate, expiry, status, declined, planId} = req.body;
+        const {planName, amount, purchaseDate, image, expiry, status, declined, planId} = req.body;
         if(status == true){
             const planData = await PurchasePlan.findById(planId);
             const choosedPlanName = planData?.planName;
@@ -125,15 +126,15 @@ exports.addPurchasePlan = async (req, res) => {
             res.send({status: true, message: "Plan declined successfully"});
         }else{
             const userId = req.user.id;
-            const image = req.file;
+            // const image = req.file;
             
             let myPlans = await PurchasePlan.find({userId: userId});
             myPlans = myPlans.filter(e => e.status == false && e.declined == false)
             const plan = myPlans.filter(e => e.expiry > Date.now()).pop()?.planName;
             if(plan) return res.send({status: false, message: "Wait for last uploaded plan response"});
             
-            const uploadImage = image.destination + image.filename;
-            await PurchasePlan.create({planName, amount, userId, purchaseDate, expiry, image: uploadImage});
+            // const uploadImage = image.destination + image.filename;
+            await PurchasePlan.create({planName, amount, userId, purchaseDate, expiry, image: image});
             res.send({status: true, message: "Plan purchase requested successfully"});
         }
     }catch(e){
@@ -144,8 +145,11 @@ exports.addPurchasePlan = async (req, res) => {
 
 exports.uploadQrCode = async (req, res) => {
     try{
-        const qrCodeImage = req.file;
-        const qrCode = qrCodeImage.destination + qrCodeImage.filename;
+        const { qrCode } = req.body;
+        // const qrCodeImage = req.file;
+        // const qrCode = qrCodeImage.destination + qrCodeImage.filename;
+        console.log(qrCode);
+        
         let data = await Global.findOne();
         if(data){
             data.qrCode = qrCode;
@@ -164,7 +168,7 @@ exports.getPaymentQr = async (req, res) => {
         let data = await Global.findOne();
         const baseUrl = `${protocol}://${req.get('host')}/`;
         if(data != null){
-            data = {...data._doc, qrCode: data.qrCode != null ? baseUrl+data.qrCode : data.qrCode};
+            data = {...data._doc, qrCode: data.qrCode != null ? !data.qrCode.includes('uploads/') ? await getObjectUrl(data.qrCode) : baseUrl+data.qrCode : data.qrCode};
         }
         res.send({status: true, message: "Data fetched successfully", data: data});
     }catch(e){
@@ -191,11 +195,16 @@ exports.purchasePlanRequest = async (req, res) => {
         let data = await PurchasePlan.find().populate('userId');
         data = data.filter(e => e.status == false && e.declined == false && e.userId!=null);
         const baseUrl = `${protocol}://${req.get('host')}/`;
-        data = data.map(e => {
-            return {...e._doc, image: baseUrl+e.image};
-        });
-        if(data.length == 0) return res.send({status: false, message: "No Pending requests"});
-        res.send({status: true, message: "Data fetched successfully", data: data});
+        // data = data.map(e => {
+        //     return {...e._doc, image: baseUrl+e.image};
+        // });
+        let allData = [];
+        for (let index = 0; index < data.length; index++) {
+            const e = data[index];
+            allData.push({...e._doc, image: !e.image.includes("uploads/") ? await getObjectUrl(e.image) : baseUrl+e.image});
+        }
+        if(allData.length == 0) return res.send({status: false, message: "No Pending requests"});
+        res.send({status: true, message: "Data fetched successfully", data: allData});
     }catch(e){
         res.send({status: false, message: e.message});
     }
